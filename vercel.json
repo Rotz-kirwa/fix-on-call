@@ -1,0 +1,13 @@
+{
+  "buildCommand": "cd fix-on-call-platform && npm install && npm run build",
+  "outputDirectory": "fix-on-call-platform/dist",
+  "devCommand": "cd fix-on-call-platform && npm run dev",
+  "installCommand": "cd fix-on-call-platform && npm install",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
