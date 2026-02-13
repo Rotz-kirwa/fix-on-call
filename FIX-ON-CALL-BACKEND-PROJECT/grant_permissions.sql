@@ -1,0 +1,7 @@
+GRANT ALL PRIVILEGES ON DATABASE fix_on_call TO fix_on_call_user;
+\c fix_on_call
+GRANT ALL ON SCHEMA public TO fix_on_call_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO fix_on_call_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO fix_on_call_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO fix_on_call_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO fix_on_call_user;
