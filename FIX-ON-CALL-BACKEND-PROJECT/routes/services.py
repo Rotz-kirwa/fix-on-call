@@ -10,6 +10,7 @@ services_bp = Blueprint('services', __name__)
 
 SERVICE_TYPES = ['breakdown', 'towing', 'fuel_delivery', 'tyre_change', 'battery_jump', 'lockout', 'mechanic_dispatch']
 STATUSES = ['pending', 'accepted', 'in_progress', 'completed', 'cancelled']
+TRACKER_STATUSES = ['confirmed', 'dispatched', 'arrived', 'in_service', 'rejected']
 
 @services_bp.route('/request', methods=['POST'])
 @jwt_required()
@@ -144,7 +145,8 @@ def update_service_status(service_id):
         if 'status' not in data:
             return jsonify({'success': False, 'error': 'status is required'}), 400
         
-        if data['status'] not in STATUSES:
+        allowed_statuses = STATUSES + TRACKER_STATUSES
+        if data['status'] not in allowed_statuses:
             return jsonify({'success': False, 'error': f'Invalid status'}), 400
         
         service = Service.query.get(service_id)
@@ -157,7 +159,7 @@ def update_service_status(service_id):
         if data['status'] == 'completed':
             service.completed_at = datetime.utcnow()
         
-        if data['status'] in ['completed', 'cancelled'] and service.assigned_to:
+        if data['status'] in ['completed', 'cancelled', 'rejected'] and service.assigned_to:
             mechanic = User.query.get(service.assigned_to)
             if mechanic:
                 mechanic.is_available = True

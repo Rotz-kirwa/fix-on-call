@@ -1,7 +1,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type UserRole = "driver" | "mechanic" | "admin";
+export type UserRole =
+  | "driver"
+  | "mechanic"
+  | "admin"
+  | "super_admin"
+  | "support_agent"
+  | "finance"
+  | "dispatch"
+  | "partner_manager";
 
 interface User {
   id: string;
@@ -9,6 +17,12 @@ interface User {
   email: string;
   role: UserRole;
   phone?: string;
+  vehicleInfo?: {
+    make?: string;
+    model?: string;
+    year?: number;
+    license_plate?: string;
+  };
 }
 
 interface AuthState {

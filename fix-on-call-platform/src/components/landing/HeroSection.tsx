@@ -20,11 +20,6 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <div className="inline-flex items-center gap-2 bg-primary/20 border border-primary/30 rounded-full px-4 py-1.5 mb-6">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-sm font-medium text-primary-foreground/90">Now available across Kenya</span>
-            </div>
-
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight text-background mb-6">
               Roadside help,{" "}
               <span className="text-primary">in minutes.</span>
@@ -34,16 +29,16 @@ const HeroSection = () => {
               Flat tire? Engine trouble? Fix On Call connects you with verified mechanics near you — fast, reliable, and transparent.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-12">
-              <Link to="/register">
-                <Button variant="hero" size="xl" className="w-full sm:w-auto">
-                  Request a Mechanic
+            <div className="grid grid-cols-2 sm:flex sm:flex-row gap-3 mb-12">
+              <Link to="/service-request">
+                <Button variant="hero" size="xl" className="w-full">
+                  Request Service
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
-              <Link to="/register">
-                <Button variant="hero-outline" size="xl" className="w-full sm:w-auto border-background/30 text-background hover:bg-background hover:text-foreground">
-                  Join as Mechanic
+              <Link to="/vendor-application">
+                <Button variant="hero-outline" size="xl" className="w-full border-background/30 text-background hover:bg-background hover:text-foreground">
+                  Be a Partner
                 </Button>
               </Link>
             </div>

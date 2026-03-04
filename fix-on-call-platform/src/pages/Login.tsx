@@ -32,17 +32,18 @@ const Login = () => {
       
       login(
         {
-          id: user._id,
+          id: String(user.id ?? user._id ?? ""),
           name: user.name,
           email: user.email,
           role: user.user_type as UserRole,
           phone: user.phone,
+          vehicleInfo: user.vehicle_info,
         },
         token
       );
       
       toast({ title: `Welcome back, ${user.name}!` });
-      navigate(user.user_type === "mechanic" ? "/mechanic" : user.user_type === "admin" ? "/admin" : "/driver");
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Login failed",

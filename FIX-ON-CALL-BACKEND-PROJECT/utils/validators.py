@@ -7,15 +7,9 @@ def validate_email(email: str) -> bool:
     return re.match(pattern, email) is not None
 
 def validate_password(password: str) -> Tuple[bool, str]:
-    """Validate password strength"""
-    if len(password) < 8:
-        return False, "Password must be at least 8 characters long"
-    if not re.search(r'[A-Z]', password):
-        return False, "Password must contain at least one uppercase letter"
-    if not re.search(r'[a-z]', password):
-        return False, "Password must contain at least one lowercase letter"
-    if not re.search(r'\d', password):
-        return False, "Password must contain at least one digit"
+    """Validate 4-digit PIN password"""
+    if not re.fullmatch(r"\d{4}", password or ""):
+        return False, "Password must be exactly 4 digits"
     return True, "Password is valid"
 
 def validate_phone(phone: str) -> bool:

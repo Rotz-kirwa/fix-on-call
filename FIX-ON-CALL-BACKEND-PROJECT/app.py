@@ -29,7 +29,7 @@ def create_app(config_class=Config):
     cors.init_app(app, resources={
         r"/api/*": {
             "origins": "*",
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": False
         }
@@ -40,8 +40,32 @@ def create_app(config_class=Config):
     
     # Import models to ensure they're registered
     with app.app_context():
-        from models import user, service, booking, payment
+        from models import user, service, booking, payment, support
+        from models.user import User
         db.create_all()
+
+        # Development convenience: keep a default admin account available.
+        default_admin_email = "info@fixoncall.com"
+        default_admin_password = "1362"
+        default_admin_phone = "+254726392725"
+
+        default_admin = User.query.filter_by(email=default_admin_email).first()
+        if not default_admin:
+            default_admin = User(
+                email=default_admin_email,
+                name="Fix On Call Admin",
+                phone=default_admin_phone,
+                user_type="admin",
+                is_active=True,
+            )
+            default_admin.set_password(default_admin_password)
+            db.session.add(default_admin)
+            db.session.commit()
+        else:
+            # Keep requested simplified admin password in sync.
+            if not default_admin.check_password(default_admin_password):
+                default_admin.set_password(default_admin_password)
+                db.session.commit()
     
     # Import and register blueprints
     from routes.auth import auth_bp
@@ -50,6 +74,7 @@ def create_app(config_class=Config):
     from routes.admin import admin_bp
     from routes.notifications import notifications_bp
     from routes.payments import payments_bp
+    from routes.support import support_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(services_bp, url_prefix='/api/services')
@@ -57,6 +82,7 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(notifications_bp, url_prefix='/api/notifications')
     app.register_blueprint(payments_bp, url_prefix='/api/payments')
+    app.register_blueprint(support_bp, url_prefix='/api/support')
     
     # Error handlers
     @app.errorhandler(404)

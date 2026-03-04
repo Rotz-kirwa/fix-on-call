@@ -14,8 +14,12 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [vehicleMake, setVehicleMake] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
+  const [vehicleYear, setVehicleYear] = useState("");
+  const [licensePlate, setLicensePlate] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<UserRole>("driver");
+  const role: UserRole = "driver";
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
@@ -27,32 +31,47 @@ const Register = () => {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
+    if (role === "driver" && (!vehicleMake || !vehicleModel || !licensePlate)) {
+      toast({ title: "Add your car details", description: "Make, model, and plate number are required for drivers.", variant: "destructive" });
+      return;
+    }
     
     setLoading(true);
     try {
+      const normalizedPhone = phone.replace(/[\s-]/g, "");
       const response = await authAPI.register({
         name,
         email,
-        phone,
+        phone: normalizedPhone,
         password,
         user_type: role,
+        vehicle_info:
+          role === "driver"
+            ? {
+                make: vehicleMake,
+                model: vehicleModel,
+                year: vehicleYear ? Number(vehicleYear) : undefined,
+                license_plate: licensePlate.toUpperCase(),
+              }
+            : undefined,
       });
       
       const { user, token } = response.data;
       
       login(
         {
-          id: user._id,
+          id: String(user.id ?? user._id ?? ""),
           name: user.name,
           email: user.email,
           role: user.user_type as UserRole,
           phone: user.phone,
+          vehicleInfo: user.vehicle_info,
         },
         token
       );
       
       toast({ title: "Account created!", description: `Welcome to Fix On Call, ${name}` });
-      navigate(role === "mechanic" ? "/mechanic" : "/driver");
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Registration failed",
@@ -63,11 +82,6 @@ const Register = () => {
       setLoading(false);
     }
   };
-
-  const roles: { value: UserRole; label: string; desc: string }[] = [
-    { value: "driver", label: "Driver", desc: "Need roadside help" },
-    { value: "mechanic", label: "Mechanic", desc: "Offer your services" },
-  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 py-12">
@@ -90,24 +104,6 @@ const Register = () => {
         </div>
 
         <div className="bg-card rounded-2xl shadow-card border border-border p-6">
-          {/* Role selector */}
-          <div className="grid grid-cols-2 gap-2 mb-6">
-            {roles.map((r) => (
-              <button
-                key={r.value}
-                onClick={() => setRole(r.value)}
-                className={`p-4 rounded-xl border-2 text-center transition-all duration-200 ${
-                  role === r.value
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-muted-foreground/30"
-                }`}
-              >
-                <div className={`text-sm font-semibold ${role === r.value ? "text-primary" : "text-foreground"}`}>{r.label}</div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">{r.desc}</div>
-              </button>
-            ))}
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
@@ -121,15 +117,65 @@ const Register = () => {
               <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
               <Input id="phone" placeholder="+254 700 000 000" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1.5 h-11 rounded-xl" />
             </div>
+            {role === "driver" && (
+              <>
+                <div className="pt-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Car Details</p>
+                </div>
+                <div>
+                  <Label htmlFor="vehicleMake" className="text-sm font-medium">Make</Label>
+                  <Input
+                    id="vehicleMake"
+                    placeholder="Toyota"
+                    value={vehicleMake}
+                    onChange={(e) => setVehicleMake(e.target.value)}
+                    className="mt-1.5 h-11 rounded-xl"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="vehicleModel" className="text-sm font-medium">Model</Label>
+                  <Input
+                    id="vehicleModel"
+                    placeholder="Premio"
+                    value={vehicleModel}
+                    onChange={(e) => setVehicleModel(e.target.value)}
+                    className="mt-1.5 h-11 rounded-xl"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="vehicleYear" className="text-sm font-medium">Year</Label>
+                  <Input
+                    id="vehicleYear"
+                    type="number"
+                    placeholder="2020"
+                    value={vehicleYear}
+                    onChange={(e) => setVehicleYear(e.target.value)}
+                    className="mt-1.5 h-11 rounded-xl"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="licensePlate" className="text-sm font-medium">Plate Number</Label>
+                  <Input
+                    id="licensePlate"
+                    placeholder="KDA 123A"
+                    value={licensePlate}
+                    onChange={(e) => setLicensePlate(e.target.value)}
+                    className="mt-1.5 h-11 rounded-xl uppercase"
+                  />
+                </div>
+              </>
+            )}
             <div>
-              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password (4-digit PIN)</Label>
               <div className="relative mt-1.5">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="1234"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  inputMode="numeric"
+                  maxLength={4}
                   className="h-11 rounded-xl pr-10"
                 />
                 <button

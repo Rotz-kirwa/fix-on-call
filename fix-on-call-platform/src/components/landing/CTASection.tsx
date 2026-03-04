@@ -26,7 +26,7 @@ const CTASection = () => {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/register">
               <Button size="xl" className="w-full sm:w-auto bg-background text-foreground hover:bg-background/90 shadow-lg">
-                Get Started Free
+                Get Started
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>

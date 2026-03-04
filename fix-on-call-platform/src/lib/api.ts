@@ -67,6 +67,16 @@ export const paymentsAPI = {
   getPaymentByService: (serviceId: string) => api.get(`/payments/service/${serviceId}`),
 };
 
+export const supportAPI = {
+  createConversation: (data: any) => api.post('/support/conversations', data),
+  listConversations: (params?: any) => api.get('/support/conversations', { params }),
+  listMessages: (conversationId: number) => api.get(`/support/conversations/${conversationId}/messages`),
+  createMessage: (conversationId: number, data: any) =>
+    api.post(`/support/conversations/${conversationId}/messages`, data),
+  updateConversation: (conversationId: number, data: any) =>
+    api.patch(`/support/conversations/${conversationId}`, data),
+};
+
 export const adminAPI = {
   getDashboard: () => api.get('/admin/dashboard'),
   getUsers: (params?: any) => api.get('/admin/users', { params }),

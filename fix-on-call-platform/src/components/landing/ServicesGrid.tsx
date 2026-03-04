@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const services = [
   { 
@@ -33,7 +35,11 @@ const services = [
   },
 ];
 
-const ServicesGrid = () => {
+interface ServicesGridProps {
+  showCTA?: boolean;
+}
+
+const ServicesGrid = ({ showCTA = false }: ServicesGridProps) => {
   return (
     <section id="services" className="py-24">
       <div className="container mx-auto px-4">
@@ -43,13 +49,14 @@ const ServicesGrid = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Featured Services</p>
           <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-2">What We Fix</p>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground">
             Services for every breakdown
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
           {services.map((service, i) => (
             <motion.div
               key={service.title}
@@ -57,19 +64,26 @@ const ServicesGrid = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="group rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 overflow-hidden"
+              className="group rounded-2xl bg-card border border-border shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 overflow-hidden w-full"
             >
               {service.image ? (
-                <div className="relative h-80 w-full overflow-hidden">
+                <div className="relative h-72 md:h-80 w-full overflow-hidden">
                   <img 
                     src={service.image} 
                     alt={service.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300" 
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                     <h3 className="font-bold text-lg mb-1">{service.title}</h3>
                     <p className="text-sm text-white/90 leading-relaxed">{service.desc}</p>
+                    {showCTA && (
+                      <Link to="/service-request" className="inline-block mt-4">
+                        <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                          Get Service
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               ) : null}
