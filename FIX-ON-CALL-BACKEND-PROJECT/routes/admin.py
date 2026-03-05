@@ -18,7 +18,11 @@ def is_admin(user_id):
 @jwt_required()
 def dashboard():
     try:
-        current_user_id = int(get_jwt_identity())
+        jwt_identity = get_jwt_identity()
+        try:
+            current_user_id = int(jwt_identity)
+        except (TypeError, ValueError):
+            return jsonify({'success': False, 'error': 'Invalid token identity'}), 401
         
         if not is_admin(current_user_id):
             return jsonify({'success': False, 'error': 'Admin access required'}), 403
@@ -48,23 +52,21 @@ def dashboard():
         # Keep dashboard trend anchored from March.
         trend_start = datetime(now.year, 3, 1)
 
+        # Aggregate in Python to avoid DB-specific date functions causing 500s.
         revenue_rows = db.session.query(
-            func.date_trunc('month', Payment.created_at).label('month'),
-            func.coalesce(func.sum(Payment.amount), 0).label('amount')
+            Payment.created_at,
+            Payment.amount
         ).filter(
             Payment.status == 'completed',
             Payment.created_at >= trend_start
-        ).group_by(
-            func.date_trunc('month', Payment.created_at)
-        ).order_by(
-            func.date_trunc('month', Payment.created_at)
         ).all()
 
-        revenue_map = {
-            row[0].strftime('%Y-%m'): float(row[1] or 0)
-            for row in revenue_rows
-            if row[0]
-        }
+        revenue_map = {}
+        for created_at, amount in revenue_rows:
+            if not created_at:
+                continue
+            key = created_at.strftime('%Y-%m')
+            revenue_map[key] = revenue_map.get(key, 0.0) + float(amount or 0.0)
 
         month_labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         revenue_trend = []
