@@ -7,8 +7,18 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isAuthenticated, logout } = useAuthStore();
-  const adminAppUrl = import.meta.env.VITE_ADMIN_APP_URL || "http://localhost:8090";
+  const { isAuthenticated, logout, user } = useAuthStore();
+  const dashboardPath =
+    user?.role === "mechanic"
+      ? "/mechanic"
+      : user?.role === "admin" ||
+          user?.role === "super_admin" ||
+          user?.role === "support_agent" ||
+          user?.role === "finance" ||
+          user?.role === "dispatch" ||
+          user?.role === "partner_manager"
+        ? "/admin"
+        : "/driver";
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border shadow-sm">
@@ -26,6 +36,10 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-6">
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Home</Link>
           <Link to="/services" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Services</Link>
+          <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+          {isAuthenticated && (
+            <Link to={dashboardPath} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
+          )}
           <Link to="/how-it-works" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">How It Works</Link>
           <Link to="/about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">About Us</Link>
           <Link to="/plans" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Plans</Link>
@@ -37,12 +51,6 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <a
-                href={`${adminAppUrl}/admin-login`}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Admin Login
-              </a>
               <Link to="/login">
                 <Button variant="ghost" size="sm">Log In</Button>
               </Link>
@@ -71,6 +79,10 @@ const Navbar = () => {
             <div className="flex flex-col gap-2 p-4">
               <Link to="/" className="py-2 text-sm font-medium text-muted-foreground" onClick={() => setMobileOpen(false)}>Home</Link>
               <Link to="/services" className="py-2 text-sm font-medium text-muted-foreground" onClick={() => setMobileOpen(false)}>Services</Link>
+              <Link to="/blog" className="py-2 text-sm font-medium text-muted-foreground" onClick={() => setMobileOpen(false)}>Blog</Link>
+              {isAuthenticated && (
+                <Link to={dashboardPath} className="py-2 text-sm font-medium text-muted-foreground" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+              )}
               <Link to="/how-it-works" className="py-2 text-sm font-medium text-muted-foreground" onClick={() => setMobileOpen(false)}>How It Works</Link>
               <Link to="/about" className="py-2 text-sm font-medium text-muted-foreground" onClick={() => setMobileOpen(false)}>About Us</Link>
               <Link to="/plans" className="py-2 text-sm font-medium text-muted-foreground" onClick={() => setMobileOpen(false)}>Plans</Link>
@@ -82,13 +94,6 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <a
-                    href={`${adminAppUrl}/admin-login`}
-                    className="py-2 text-sm font-medium text-muted-foreground"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    Admin Login
-                  </a>
                   <Link to="/login" onClick={() => setMobileOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start">Log In</Button>
                   </Link>

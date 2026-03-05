@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { BadgeCheck, Headset, LocateFixed, Send, ShieldCheck, Share2, Timer, UserRound } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { supportAPI } from "@/lib/api";
+import { nowInNairobiTime } from "@/lib/time";
 
 type ChatMessage = {
   id: number;
@@ -26,18 +27,7 @@ type LivePayload = {
   ts: number;
 };
 
-const operatorReplies = [
-  "Thanks for reaching out. Please share your location or nearest landmark so we can dispatch quickly.",
-  "We have received your request. A support operator is checking available responders near you.",
-  "Understood. Please keep your phone line open while we coordinate your rescue team.",
-  "You're covered. We are escalating this as priority support and will update you shortly.",
-];
-
-const getTime = () =>
-  new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+const getTime = () => nowInNairobiTime();
 
 const getPrecisePosition = () =>
   new Promise<GeolocationPosition>((resolve, reject) => {
@@ -140,13 +130,15 @@ const Contact = () => {
       id: 1,
       sender: "operator",
       text: "Hello, welcome to Fix On Call live support. Tell us what happened with your vehicle.",
-      time: getTime(),
+      time: "06:51",
     },
   ]);
 
   const queuePosition = useMemo(() => (isOperatorTyping ? 1 : 0), [isOperatorTyping]);
   const conversationStorageKey = user?.id ? `fixoncall-live-chat-conversation-${user.id}` : "";
   const [conversationId, setConversationId] = useState<number | null>(null);
+  const [handoffSent, setHandoffSent] = useState(false);
+  const seenSupportMessageIdsRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     if (!conversationStorageKey) return;
@@ -193,6 +185,29 @@ const Contact = () => {
     return createdId;
   };
 
+  const appendIncomingSupportMessages = (rows: Array<{ id: number; sender: string; body: string; created_at: string }>) => {
+    const incoming = rows
+      .filter((m) => m.sender !== "user")
+      .filter((m) => !seenSupportMessageIdsRef.current.has(m.id))
+      .sort((a, b) => a.id - b.id);
+    if (!incoming.length) return;
+
+    incoming.forEach((m) => seenSupportMessageIdsRef.current.add(m.id));
+    setMessages((prev) => [
+      ...prev,
+      ...incoming.map((m) => ({
+        id: Number(`9${m.id}`),
+        sender: "operator" as const,
+        text: m.body,
+        time: new Date(m.created_at).toLocaleTimeString("en-KE", {
+          timeZone: "Africa/Nairobi",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      })),
+    ]);
+  };
+
   const pushUserMessageToSupport = async (text: string) => {
     try {
       const id = await ensureConversation();
@@ -217,18 +232,30 @@ const Contact = () => {
     setMessages((prev) => [...prev, userMessage]);
     void pushUserMessageToSupport(userMessage.text);
     setMessage("");
-    setIsOperatorTyping(true);
 
-    window.setTimeout(() => {
-      const reply: ChatMessage = {
+    if (!handoffSent) {
+      setHandoffSent(true);
+      const handoffText = "You are being connected with a live operator.";
+      const handoff: ChatMessage = {
         id: Date.now() + 1,
         sender: "operator",
-        text: operatorReplies[Math.floor(Math.random() * operatorReplies.length)],
+        text: handoffText,
         time: getTime(),
       };
-      setMessages((prev) => [...prev, reply]);
-      setIsOperatorTyping(false);
-    }, 1200);
+      setMessages((prev) => [...prev, handoff]);
+      setIsOperatorTyping(true);
+      void (async () => {
+        try {
+          const id = await ensureConversation();
+          if (!id) return;
+          await supportAPI.createMessage(id, { sender: "system", body: handoffText });
+        } catch {
+          // no-op
+        }
+      })();
+    } else {
+      setIsOperatorTyping(true);
+    }
   };
 
   const shareMyInfo = () => {
@@ -249,17 +276,6 @@ const Contact = () => {
     setMessages((prev) => [...prev, infoMessage]);
     void pushUserMessageToSupport(infoMessage.text);
     setIsOperatorTyping(true);
-
-    window.setTimeout(() => {
-      const ack: ChatMessage = {
-        id: Date.now() + 1,
-        sender: "operator",
-        text: "Thanks, we’ve received your account details. Please now share your exact location or nearest landmark.",
-        time: getTime(),
-      };
-      setMessages((prev) => [...prev, ack]);
-      setIsOperatorTyping(false);
-    }, 900);
   };
 
   const shareExactLocation = async () => {
@@ -306,17 +322,6 @@ const Contact = () => {
       setMessages((prev) => [...prev, locationMessage]);
       void pushUserMessageToSupport(locationMessage.text);
       setIsOperatorTyping(true);
-
-      window.setTimeout(() => {
-        const ack: ChatMessage = {
-          id: Date.now() + 1,
-          sender: "operator",
-          text: "Perfect. We’ve received your precise coordinates and location name. Dispatching the nearest responder now.",
-          time: getTime(),
-        };
-        setMessages((prev) => [...prev, ack]);
-        setIsOperatorTyping(false);
-      }, 900);
     } catch (error: any) {
       let errorText = "Unable to fetch your location. Please enable location permission and try again.";
       if (error?.code === 1) {
@@ -498,6 +503,31 @@ const Contact = () => {
       stopLiveLocation("Live location auto-stopped after 30 minutes.");
     }, 30 * 60 * 1000);
   };
+
+  useEffect(() => {
+    if (!conversationId) return;
+    let cancelled = false;
+    const syncConversation = async () => {
+      try {
+        const res = await supportAPI.listMessages(conversationId);
+        if (cancelled) return;
+        const rows = (res.data?.messages || []) as Array<{ id: number; sender: string; body: string; created_at: string }>;
+        appendIncomingSupportMessages(rows);
+        const hasRecentOperator = rows.some((m) => m.sender !== "user");
+        if (hasRecentOperator) setIsOperatorTyping(false);
+      } catch {
+        // keep local state
+      }
+    };
+    void syncConversation();
+    const t = window.setInterval(() => {
+      void syncConversation();
+    }, 2500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(t);
+    };
+  }, [conversationId]);
 
   return (
     <div className="min-h-screen bg-background">

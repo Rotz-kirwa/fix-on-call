@@ -33,6 +33,21 @@ const services = [
     title: "Fuel Delivery", 
     desc: "Ran out of fuel? We'll bring it to you." 
   },
+  {
+    image: "https://i.pinimg.com/736x/19/21/92/1921928153ffdaf6914f17f455fb5da4.jpg",
+    title: "Minor roadside repairs",
+    desc: "Quick on-site fixes for small faults to get you moving again.",
+  },
+  {
+    image: "https://i.pinimg.com/1200x/ed/a9/67/eda967f2f648a97bf11f40bd9d3c862c.jpg",
+    title: "Car Lockout Services",
+    desc: "Locked out of your car? Get fast, damage-free key retrieval support.",
+  },
+  {
+    image: "https://i.pinimg.com/736x/bf/34/aa/bf34aa971fe424616a1e3af18e8f12fd.jpg",
+    title: "Auto Spares Delivery",
+    desc: "Need a part urgently? We deliver essential auto spares to your location.",
+  },
 ];
 
 interface ServicesGridProps {

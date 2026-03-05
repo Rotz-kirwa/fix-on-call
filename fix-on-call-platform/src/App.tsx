@@ -22,6 +22,8 @@ import ServiceRequestForm from "./pages/ServiceRequestForm";
 import DriverDashboard from "./pages/driver/Dashboard";
 import MechanicDashboard from "./pages/mechanic/Dashboard";
 import AdminExternalRedirect from "./pages/AdminExternalRedirect";
+import Blog from "./pages/Blog";
+import BlogArticle from "./pages/BlogArticle";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,13 +40,29 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogArticle />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/plans" element={<Plans />} />
-          <Route path="/payment" element={<PaymentCheckout />} />
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                <PaymentCheckout />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/service-request" element={<ServiceRequestForm />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact-info" element={<ContactInfo />} />
-          <Route path="/vendor-application" element={<VendorApplication />} />
+          <Route
+            path="/vendor-application"
+            element={
+              <ProtectedRoute>
+                <VendorApplication />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/contact" element={<Contact />} />

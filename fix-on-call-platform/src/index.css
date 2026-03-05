@@ -111,6 +111,10 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   * {
     @apply border-border;
   }
@@ -163,4 +167,56 @@
 
 .animate-live-blink {
   animation: live-blink 1.1s ease-in-out infinite;
+}
+
+/* Global mobile compression pass for tighter preview fit */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .container {
+    padding-left: 0.875rem !important;
+    padding-right: 0.875rem !important;
+  }
+
+  h1 {
+    font-size: clamp(1.35rem, 6vw, 1.9rem);
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: clamp(1.15rem, 5.2vw, 1.45rem);
+    line-height: 1.24;
+  }
+
+  h3 {
+    font-size: clamp(1rem, 4.6vw, 1.2rem);
+    line-height: 1.28;
+  }
+
+  p {
+    line-height: 1.45;
+  }
+
+  /* Compress default controls and bars in mobile */
+  button,
+  [role="button"] {
+    min-height: 2.2rem;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 2.2rem;
+    font-size: 0.92rem;
+  }
+
+  .rounded-2xl {
+    border-radius: 0.9rem;
+  }
 }

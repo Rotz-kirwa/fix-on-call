@@ -3,8 +3,10 @@ import Footer from "@/components/layout/Footer";
 import { CheckCircle2, CarFront } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
 
 const Plans = () => {
+  const { isAuthenticated } = useAuthStore();
   return (
     <div className="min-h-screen bg-[#efefef]">
       <Navbar />
@@ -62,11 +64,19 @@ const Plans = () => {
                     <span className="text-2xl font-medium text-muted-foreground">/ (1) Vehicle Yearly</span>
                   </div>
                   <p className="text-2xl text-muted-foreground mb-6">Comprehensive coverage for regular drivers</p>
-                  <Link to="/payment?plan=annual">
-                    <Button className="w-full h-14 rounded-full text-2xl font-bold bg-[#ff4d3a] hover:bg-[#f13f2c]">
-                      Cover your vehicle
-                    </Button>
-                  </Link>
+                  {isAuthenticated ? (
+                    <Link to="/payment?plan=annual">
+                      <Button className="w-full h-14 rounded-full text-2xl font-bold bg-[#ff4d3a] hover:bg-[#f13f2c]">
+                        Cover your vehicle
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link to="/register">
+                      <Button className="w-full h-14 rounded-full text-xl font-bold bg-[#ff4d3a] hover:bg-[#f13f2c]">
+                        Create account first
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </article>
 

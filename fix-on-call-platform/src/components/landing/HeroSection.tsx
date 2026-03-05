@@ -31,13 +31,13 @@ const HeroSection = () => {
 
             <div className="grid grid-cols-2 sm:flex sm:flex-row gap-3 mb-12">
               <Link to="/service-request">
-                <Button variant="hero" size="xl" className="w-full">
+                <Button variant="hero" size="xl" className="w-auto max-w-[9.5rem] h-10 px-3 text-sm sm:w-full sm:max-w-none sm:h-14 sm:px-10 sm:text-lg">
                   Request Service
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </Link>
               <Link to="/vendor-application">
-                <Button variant="hero-outline" size="xl" className="w-full border-background/30 text-background hover:bg-background hover:text-foreground">
+                <Button variant="hero-outline" size="xl" className="w-auto max-w-[9.5rem] h-10 px-3 text-sm sm:w-full sm:max-w-none sm:h-14 sm:px-10 sm:text-lg border-background/30 text-background hover:bg-background hover:text-foreground">
                   Be a Partner
                 </Button>
               </Link>

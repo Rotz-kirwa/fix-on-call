@@ -1,25 +1,12 @@
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
-import {
-  Car,
-  Clock3,
-  CreditCard,
-  Mail,
-  MapPin,
-  Phone,
-  PhoneCall,
-  Route,
-  ShieldCheck,
-  User,
-  CheckCircle2,
-  Circle,
-  AlertTriangle,
-} from "lucide-react";
+import { Car, Clock3, CreditCard, Mail, MapPin, Phone, User, CheckCircle2, Circle, AlertTriangle, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useSearchParams } from "react-router-dom";
 import { servicesAPI } from "@/lib/api";
+import { formatDateObjectNairobi, nowInNairobiDateTime } from "@/lib/time";
 
 type RequestStatus = "pending" | "confirmed" | "dispatched" | "arrived" | "in_service" | "completed" | "rejected";
 
@@ -69,10 +56,11 @@ const DriverDashboard = () => {
   const [status, setStatus] = useState<RequestStatus>("pending");
   const [etaMins, setEtaMins] = useState(12);
   const [activeService, setActiveService] = useState("Roadside Assistance");
+  const [nairobiNow, setNairobiNow] = useState(nowInNairobiDateTime());
   const planExpiry = useMemo(() => {
-    const d = new Date();
-    d.setFullYear(d.getFullYear() + 1);
-    return d.toLocaleDateString("en-KE", { year: "numeric", month: "short", day: "numeric" });
+    const plusYear = new Date();
+    plusYear.setFullYear(plusYear.getFullYear() + 1);
+    return formatDateObjectNairobi(plusYear);
   }, []);
 
   const currentStepIndex = useMemo(() => {
@@ -97,6 +85,13 @@ const DriverDashboard = () => {
     }
     return { label: "In Progress", tone: "bg-emerald-50 text-emerald-700", message: "Your service is active and being handled now." };
   }, [status]);
+
+  useEffect(() => {
+    const t = window.setInterval(() => {
+      setNairobiNow(nowInNairobiDateTime());
+    }, 1000);
+    return () => window.clearInterval(t);
+  }, []);
 
   useEffect(() => {
     if (searchParams.get("track") === "1") {
@@ -151,8 +146,9 @@ const DriverDashboard = () => {
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Hello, {user?.name || "Driver"} 👋</h1>
-              <p className="text-sm text-slate-700 mt-1">Track your service request in real time, Uber-style.</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Hello, Goemez 👋</h1>
+              <p className="text-sm text-slate-700 mt-1">Track your service request with live updates.</p>
+              <p className="text-xs text-slate-500 mt-1">Nairobi Time: {nairobiNow} (EAT)</p>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/90 px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -215,33 +211,6 @@ const DriverDashboard = () => {
                 </div>
               </article>
 
-              <article className="rounded-2xl border border-indigo-100 bg-white/95 shadow-[0_16px_45px_rgba(30,64,175,0.15)] p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-bold text-slate-900 flex items-center gap-2"><MapPin className="w-5 h-5 text-primary" /> Live Map Preview</h3>
-                  <span className="text-xs text-slate-500">Last update: just now</span>
-                </div>
-
-                <div className="relative h-[360px] rounded-xl overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-                  <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #94a3b8 1px, transparent 0)", backgroundSize: "18px 18px" }} />
-                  <div className="absolute left-[22%] top-[64%] h-4 w-4 rounded-full bg-blue-400 shadow-[0_0_20px_rgba(96,165,250,0.9)]" />
-                  <div className="absolute right-[20%] top-[34%] h-4 w-4 rounded-full bg-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.9)] animate-pulse" />
-                  <div className="absolute left-[25%] top-[62%] w-[52%] h-[2px] bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400 rotate-[-22deg]" />
-
-                  <div className="absolute left-4 bottom-4 rounded-lg bg-black/40 border border-white/15 px-3 py-2 text-xs text-slate-100">
-                    You: Kiambu Rd
-                  </div>
-                  <div className="absolute right-4 top-4 rounded-lg bg-black/40 border border-white/15 px-3 py-2 text-xs text-slate-100">
-                    Mechanic: 3.1 km away
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-                  <Button variant="outline" className="border-cyan-300 bg-cyan-50 hover:bg-cyan-100"><PhoneCall className="w-4 h-4" /> Call</Button>
-                  <Button variant="outline" className="border-amber-300 bg-amber-50 hover:bg-amber-100"><Route className="w-4 h-4" /> Route</Button>
-                  <Button variant="outline" className="border-orange-300 bg-orange-50 hover:bg-orange-100"><MapPin className="w-4 h-4" /> Share Pin</Button>
-                  <Button variant="outline" className="border-emerald-300 bg-emerald-50 hover:bg-emerald-100"><ShieldCheck className="w-4 h-4" /> Safety</Button>
-                </div>
-              </article>
             </section>
 
             <aside className="xl:col-span-4 space-y-6">
