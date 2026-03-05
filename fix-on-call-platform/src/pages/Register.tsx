@@ -35,10 +35,30 @@ const Register = () => {
       toast({ title: "Add your car details", description: "Make, model, and plate number are required for drivers.", variant: "destructive" });
       return;
     }
+    const normalizedPhone = phone.replace(/[\s-]/g, "");
+    if (!/^(?:\+254|0)7\d{8}$/.test(normalizedPhone)) {
+      toast({
+        title: "Invalid phone number",
+        description: "Use Kenyan format: +2547XXXXXXXX or 07XXXXXXXX.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (vehicleYear) {
+      const year = Number(vehicleYear);
+      const currentYear = new Date().getFullYear();
+      if (!Number.isInteger(year) || year < 1980 || year > currentYear + 1) {
+        toast({
+          title: "Invalid vehicle year",
+          description: `Enter a valid year between 1980 and ${currentYear + 1}.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     
     setLoading(true);
     try {
-      const normalizedPhone = phone.replace(/[\s-]/g, "");
       const response = await authAPI.register({
         name,
         email,
@@ -73,9 +93,14 @@ const Register = () => {
       toast({ title: "Account created!", description: `Welcome to Fix On Call, ${name}` });
       navigate("/");
     } catch (error: any) {
+      const backendError =
+        error?.response?.data?.error ||
+        error?.message ||
+        "Network error. Check backend URL/CORS and try again.";
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
-        description: error.response?.data?.error || "Something went wrong",
+        description: backendError,
         variant: "destructive",
       });
     } finally {
