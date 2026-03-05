@@ -13,6 +13,10 @@ def _normalize_database_url(url: str) -> str:
         url = url.replace("postgresql://", "postgresql+psycopg://", 1)
     return url
 
+
+def _parse_origins(raw: str) -> list[str]:
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
+
 class Config:
     # PostgreSQL Configuration
     SQLALCHEMY_DATABASE_URI = _normalize_database_url(os.getenv(
@@ -62,3 +66,9 @@ class Config:
     
     # Google Maps
     GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
+
+    # CORS
+    CORS_ALLOWED_ORIGINS = _parse_origins(os.getenv(
+        'CORS_ALLOWED_ORIGINS',
+        'http://localhost:8080,http://localhost:8090,https://fix-on-call.vercel.app,https://fix-on-call-admin.vercel.app,https://getfixoncall.com,https://www.getfixoncall.com'
+    ))

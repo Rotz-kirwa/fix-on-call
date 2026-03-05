@@ -26,9 +26,10 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     jwt.init_app(app)
     mail.init_app(app)
+    allowed_origins = app.config.get("CORS_ALLOWED_ORIGINS", [])
     cors.init_app(app, resources={
         r"/api/*": {
-            "origins": "*",
+            "origins": allowed_origins,
             "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": False
