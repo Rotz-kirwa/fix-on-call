@@ -16,6 +16,6 @@ redis==5.0.1
 celery==5.3.4
 googlemaps==4.10.0
 python-magic==0.4.27
-Pillow==10.1.0
+Pillow>=11.0.0
 SQLAlchemy==2.0.23
 gunicorn==22.0.0
