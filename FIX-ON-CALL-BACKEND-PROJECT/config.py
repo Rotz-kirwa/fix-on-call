@@ -4,12 +4,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+def _normalize_database_url(url: str) -> str:
+    """Normalize DB URLs for SQLAlchemy + psycopg (v3)."""
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    if url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return url
+
 class Config:
     # PostgreSQL Configuration
-    SQLALCHEMY_DATABASE_URI = os.getenv(
+    SQLALCHEMY_DATABASE_URI = _normalize_database_url(os.getenv(
         'DATABASE_URL',
         'postgresql://postgres:postgres@localhost:5432/fix_on_call'
-    )
+    ))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_size': 10,
