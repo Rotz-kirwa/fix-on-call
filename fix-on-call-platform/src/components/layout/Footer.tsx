@@ -21,10 +21,10 @@ const Footer = () => {
               <a href="https://www.facebook.com/fixoncall" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
                 <Facebook className="w-5 h-5 text-[#1877F2]" />
               </a>
-              <a href="https://www.instagram.com/fixoncall" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
+              <a href="https://www.instagram.com/getfixoncall?igsh=M2djY2U1eXdiMW5h" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
                 <Instagram className="w-5 h-5 text-[#E4405F]" />
               </a>
-              <a href="https://www.tiktok.com/@fixoncall" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
+              <a href="https://www.tiktok.com/@getfixoncall?lang=en" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform">
                 <FaTiktok className="w-5 h-5 text-[#000000]" />
               </a>
             </div>
